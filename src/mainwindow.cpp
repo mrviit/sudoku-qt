@@ -9,10 +9,6 @@
 
 #include "sudokusolver.h"
 
-/**
- * @brief 加载颜色风格
- * @return jsonObject的字典
- */
 QJsonObject loadStyle()
 {
     QString path = ":/styles/";
@@ -64,10 +60,10 @@ MainWindow::MainWindow(QWidget *parent) :
     /*********************************************/
 
     auto colorStyle = loadStyle();
-    int gridSize = 81;           // 格子的大小
-    int margin   = 15;           // 四周的边缘宽度
-    int spacing  = 5;            // 九宫格之间的间隔
-    int halfSize = gridSize / 2; // 半个格子的大小，也是按钮的高度
+    int gridSize = 81;
+    int margin   = 15;
+    int spacing  = 5;
+    int halfSize = gridSize / 2;
 
     /*********************************************/
 
@@ -102,10 +98,6 @@ MainWindow::MainWindow(QWidget *parent) :
             grid->setColorStyle(colorStyle["GridWidget"].toObject());
             m_grids[r][c] = grid;
 
-            // 问题1：取消后立刻移到被取消的单元格，marker会出现，原因：off比hover里的on晚触发
-            // 问题2：面板显示时，左击附近格子再立刻移入之前的格子，会出现marker | 通过添加m_switching解决
-            // 问题3：点选数字后迅速移开，当前格子还会有marker | 通过添加m_forcing解决
-
             connect(grid, &GridWidget::hovered, [=]()
             {
                 if (!grid->isEnabled())
@@ -137,20 +129,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
             connect(grid, &GridWidget::rightClicked, [=]()
             {
-                // 菜单未打开就清空
                 if (!m_panel->isVisible())
                 {
                     clearGrid(r, c);
                     return;
                 }
 
-                // 如果菜单关闭失败（正在关闭/打开）直接退出
                 if (!m_panel->canHide())
                 {
                     return;
                 }
 
-                // 从有唯一值到有多选值也看做是一步操作
                 if (m_panel->m_selected && m_grids[m_sr][m_sc]->value())
                 {
                     receiveResult(0);
@@ -166,8 +155,6 @@ MainWindow::MainWindow(QWidget *parent) :
                 if (!m_panel->isVisible() || m_panel->hide())
                 {
                     m_switching = false;
-                    // m_sr和m_sc都小于0表示第一次打开窗体，所以没有上次打开的位置
-                    // 这里的逻辑还要再看看游戏里的逻辑是怎么样的
 
                     if (m_sr >= 0 && m_sc >= 0)
                     {
@@ -186,39 +173,31 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
-    /***************************************/
-    // 按钮
-    // 所有按钮的样式，圆角等属性每个按钮自己设定
     this->setStyleSheet("QPushButton#createdButton{background-color:#FFFFFF;color:#5F5F5F;}"
                         "QPushButton#createdButton:hover{background-color:rgb(236, 236, 236);}"
                         "QPushButton#createdButton:pressed{background-color:rgb(222, 222, 222);}"
                         "QPushButton#createdButton:!enabled{background-color:rgb(200, 200, 200);}");
 
-    // 加载按钮
     QPushButton *loadButton = createButton(this, QSize(gridSize * 3, gridSize), "Load");
     loadButton->setStyleSheet(QString("border-radius:%1px;").arg(halfSize));
     loadButton->move(margin + (gridSize * 3 + spacing) * 0, margin + gridSize * 9 + halfSize);
     connect(loadButton, SIGNAL(clicked()), this, SLOT(loadRandomPuzzle()));
 
-    // 求解按钮
     QPushButton *solveButton = createButton(this, QSize(gridSize * 3, gridSize), "Solve");
     solveButton->setStyleSheet(QString("border-radius:%1px;").arg(halfSize));
     solveButton->move(margin + (gridSize * 3 + spacing) * 1, margin + gridSize * 9 + halfSize);
     connect(solveButton, SIGNAL(clicked()), this, SLOT(solve()));
 
-    // 清空按钮
     QPushButton *clearButton = createButton(this, QSize(gridSize * 3, gridSize), "Clear");
     clearButton->setStyleSheet(QString("border-radius:%1px;").arg(halfSize));
     clearButton->move(margin + (gridSize * 3 + spacing) * 2, margin + gridSize * 9 + halfSize);
     connect(clearButton, SIGNAL(clicked()), this, SLOT(clearAll()));
 
-    // 回退按钮
     m_undoButton = createButton(this, QSize(halfSize, gridSize), "<");
     m_undoButton->move(margin + gridSize * 9 + halfSize, margin + gridSize * 9 + halfSize);
     m_undoButton->setStyleSheet(QString("border-top-left-radius:%1px;border-bottom-left-radius:%1px;").arg(halfSize / 2));
     connect(m_undoButton, SIGNAL(clicked()), this, SLOT(undo()));
 
-    // 重做按钮
     m_redoButton = createButton(this, QSize(halfSize, gridSize), ">");
     m_redoButton->move(margin + gridSize * 10, margin + gridSize * 9 + halfSize);
     m_redoButton->setStyleSheet(QString("border-top-right-radius:%1px;border-bottom-right-radius:%1px;").arg(halfSize / 2));
@@ -256,8 +235,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     /*********************************************/
 
-    // 窗口设置
-
     int minSize = gridSize * 10 + halfSize + 2 * margin;
     this->setMinimumSize(minSize, minSize);
 
@@ -281,7 +258,6 @@ MainWindow::~MainWindow()
 void MainWindow::receiveResult(int selected)
 {
     int previous = m_grids[m_sr][m_sc]->value();
-    // 选择和之前相同表示清空当前格子
     if (previous == selected)
     {
         selected = 0;
@@ -304,7 +280,6 @@ void MainWindow::highlight(int num, int active)
         {
            m_grids[pair.first][pair.second]->showBackground();
         }
-        // 取消高亮时如果在选择状态，被覆盖的块不会被取消高亮
         else if (!m_panel->isVisible() ||
                  m_controlRanges[m_sr][m_sc].find(pair) == m_controlRanges[m_sr][m_sc].end())
         {
@@ -320,7 +295,6 @@ void MainWindow::changeNumber(int r, int c, int previous, int selected)
 
     int conflicts = 0;
 
-    // 冲突检测，将和旧值相同的格子冲突数都减去1
     if (previous > 0)
     {
         m_counters[previous]->modify(1);
@@ -335,7 +309,6 @@ void MainWindow::changeNumber(int r, int c, int previous, int selected)
         }
     }
 
-    // 如果新的值不为0，将和新值相同的格子冲突数加1，再计算本身的冲突数
     if (selected > 0)
     {
         m_counters[selected]->modify(-1);
@@ -356,7 +329,6 @@ void MainWindow::changeNumber(int r, int c, int previous, int selected)
 void MainWindow::clearGrid(int r, int c)
 {
     int previous = m_grids[r][c]->value();
-    // 之前也为空就什么也不做
     if (previous == 0)
     {
         return;
@@ -427,7 +399,6 @@ void MainWindow::smartAssistOn(int r, int c)
 }
 
 
-// 随机生成谜题
 void MainWindow::loadRandomPuzzle()
 {    
     if (m_panel->isVisible())
@@ -463,7 +434,7 @@ void MainWindow::loadRandomPuzzle()
         for (int c = 0; c < 9; c++)
         {
             val = cols.at(c).toInt();
-            m_grids[r][c]->setEnabled(val == 0);  // 值为0表示待填充，即可操作
+            m_grids[r][c]->setEnabled(val == 0);
             m_grids[r][c]->setValue(val);
             m_numPositions[val].insert(qMakePair(r, c));
             ++counts[val];   
