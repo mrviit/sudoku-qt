@@ -10,10 +10,12 @@
 const int duration = 200;
 
 SelectPanel::SelectPanel(int size, QWidget *parent)
-    : QWidget(parent), m_selected(0)
+    : QFrame(parent), m_selected(0)
 {
     this->setFixedSize(size, size);
     QWidget::hide();
+    setFrameShape(QFrame::Box);
+    setLineWidth(3);
 
     int nIndex = QFontDatabase::addApplicationFont(":/fonts/ARLRDBD.TTF");
     QStringList strList(QFontDatabase::applicationFontFamilies(nIndex));
@@ -52,7 +54,6 @@ SelectPanel::SelectPanel(int size, QWidget *parent)
             connect(button, &BaseWidget::clicked, [=](){ emit finish(num); });
             connect(button, &BaseWidget::rightClicked, [=]()
             {
-                // Todo: 调整为用一个int型储存
                 int tmp = 1 << (num - 1);
                 m_selected ^= tmp;
                 button->setOpacity(m_selected & tmp ? 1.0 : 0.5);
@@ -81,7 +82,6 @@ void SelectPanel::setColorStyle(QJsonObject json)
     m_background->setColor(json.value("background_color").toString());
 }
 
-// Todo:添加canHide和canShow两个函数，将判断从实际操作的函数中剥离出来
 bool SelectPanel::isVisible() const
 {
     return QWidget::isVisible();
@@ -90,13 +90,11 @@ bool SelectPanel::isVisible() const
 
 bool SelectPanel::show(int x, int y)
 {
-    // 如果正在打开，则什么也不做
     if (m_showAnimation->state() != QAbstractAnimation::Stopped)
     {
         return false;
     }
 
-    // 如果正在关闭，则等待关闭完成
     if (m_hideAnimation->state() != QAbstractAnimation::Stopped)
     {
         QEventLoop eventLoop;
@@ -120,7 +118,6 @@ bool SelectPanel::canHide()
 
 bool SelectPanel::hide()
 {
-    // 如果正在打开或关闭，则直接退出
     if (m_showAnimation->state() != QAbstractAnimation::Stopped ||
         m_hideAnimation->state() != QAbstractAnimation::Stopped)
     {

@@ -11,14 +11,12 @@ GridWidget::GridWidget(int row, int col, int size, QWidget *parent)
 {   
     this->setUpdatesEnabled(false);
 
-    // 设置单元格大小和阴影
     QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(this);
     shadow->setOffset(2, 2);
     shadow->setBlurRadius(2);
     this->setGraphicsEffect(shadow);
     this->setFixedSize(size, size);
 
-    // 单元格的样式，四角的单元格要加圆角
     m_backgroundStyle = QString("background-color:%1;border:1px solid %2;");
     if ((row == 0 || row == 8) && (col == 0 || col == 8))
     {
@@ -28,7 +26,6 @@ GridWidget::GridWidget(int row, int col, int size, QWidget *parent)
                                 .arg(size / 5);
     }
 
-    // 底层的背景
     m_background = new QLabel(this);
     m_background->setFixedSize(size, size);
 
@@ -276,13 +273,11 @@ void GridWidget::setButtonStyle(int entered)
 {
     this->setUpdatesEnabled(false);
 
-    // m_value为0就不用修改m_singleGrid的stylesheet
     if (m_button->isEnabled() && m_value == 0)
     {
         m_multiGrids[4]->setStyleSheet(QString("color:%1;").arg(entered ? "#FBFBBF": m_style.font_color[1]));
     }
 
-    // 只有isEnabled()为true时entered才会为1
     m_singleGrid->setStyleSheet(QString("border:%1px solid %2;color:%3;")
                                 .arg(m_style.border_radius[m_numConflict == 0],
                                      m_style.border_color[m_button->isEnabled()],

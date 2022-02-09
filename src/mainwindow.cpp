@@ -96,6 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
             GridWidget *grid = new GridWidget(r, c, gridSize, this);
             grid->move(margin + c * gridSize + c / 3 * spacing, margin + r * gridSize + r / 3 * spacing);
             grid->setColorStyle(colorStyle["GridWidget"].toObject());
+//            grid->setStyleSheet(colorStyle["GridWidget"].toString());
             m_grids[r][c] = grid;
 
             connect(grid, &GridWidget::hovered, [=]()
@@ -226,8 +227,14 @@ MainWindow::MainWindow(QWidget *parent) :
        Counter *counter = new Counter(num, gridSize, this);
        counter->move(margin + gridSize * 9 + halfSize, margin - gridSize + num * (space + gridSize));
        counter->setColorStyle(counterStyle);
-       connect(counter, &Counter::hovered, [=]() {highlight(num, true);});
-       connect(counter, &Counter::leaved,  [=]() {highlight(num, false);});
+       connect(counter, &Counter::hovered,
+               [=]() {
+                   highlight(num, true);
+               });
+       connect(counter, &Counter::leaved,
+               [=]() {
+                   highlight(num, false);
+               });
        m_counters[num] = counter;
     }
 

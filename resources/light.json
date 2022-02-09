@@ -29,6 +29,9 @@
     "SelectPanel": {
         "font_color_selected": "#FBDFE8",
         "font_color": "#FAFAFA", 
-        "background_color": "#8EE4BE"    
+        "background_color": "green",
+        "background_color_": "#8EE4BE",
+        "border-width": "111",
+        "border-color": "yellow"
     }
 }

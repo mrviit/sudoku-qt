@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
     Qt::WindowFlags flags = nullptr;
     flags |= Qt::WindowMinimizeButtonHint;
-    w.setWindowFlags(flags);
+//    w.setWindowFlags(flags);
     w.show();
 
     return app.exec();

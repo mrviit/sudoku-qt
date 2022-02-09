@@ -39,14 +39,12 @@ int getV9(int v)
     return 0;
 }
 
-// 记录格子
 struct Grid
 {
     int value;
     int count;
     Grid(int _value = 511) : value(_value), count(bitCount(value)) { }
 
-    // 删除若干位，返回实际删除的位数
     int remove(int v)
     {
         int removeCount = bitCount(v & value);
@@ -56,7 +54,6 @@ struct Grid
         return removeCount;
     }
 
-    // 统计1的个数
     int bitCount(int v)
     {
         int count{ 0 };
@@ -68,14 +65,12 @@ struct Grid
         return count;
     }
 
-    // 设置结果
     void setResult(int v)
     {
         value = v;
         count = 1;
     }
 
-    // 返回最高位
     int highest()
     {
         int tmp = value;
@@ -188,7 +183,6 @@ private:
         }
     }
 
-    // 统计每一个格子的可行解，直至不能再进行为止
     void reduce(puzzleType &puzzle)
     {
         bool changed;
@@ -212,7 +206,6 @@ private:
         } while (changed);
     }
 
-    // 统计当前格子的可行解，如果可行解改变，返回true，否则返回false
     bool reduceGrid(puzzleType &puzzle, int r, int c)
     {
         int rows{ 0 };
@@ -242,11 +235,10 @@ private:
             }
         }
 
-        int invalid = rows | cols | blocks; // 不可选的值
-        return puzzle[r][c].remove(invalid) > 0; // 删除的元素大于0表示可行解发生了改变
+        int invalid = rows | cols | blocks;
+        return puzzle[r][c].remove(invalid) > 0;
     }
 
-    // 检查是否完成或失败
     resType checkResult(puzzleType &puzzle)
     {
         for (int i = 0; i < 9; i++)
@@ -287,7 +279,7 @@ private:
         }
     }
 
-    puzzleType m_puzzle; // 谜题解答
+    puzzleType m_puzzle;
 };
 
 
